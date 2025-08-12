@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>سوال جواب باحال</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>یه سوال بپرس!</h1>
+        <form action="/rag" method="POST" id="my-form">
+            <input type="text" name="query" placeholder="چی تو سرته؟" required>
+            <button type="submit">بزن بریم</button>
+        </form>
+        <div id="answer">
+            {% if response %}
+                <h2>جواب:</h2>
+                <p>{{ response }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // یه کم جاوااسکریپت که بدون رفرش جوابو نشون بده
+        document.getElementById('my-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let query = document.querySelector('input[name="query"]').value;
+            let answerDiv = document.getElementById('answer');
+            answerDiv.innerHTML = '<p>صبر کن، دارم فکر می‌کنم...</p>';
+
+            try {
+                let res = await fetch('/rag', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                let data = await res.json();
+                if (data.response) {
+                    answerDiv.innerHTML = `<h2>جواب:</h2><p>${data.response}</p>`;
+                } else {
+                    answerDiv.innerHTML = `<p>اوپس! یه مشکلی پیش اومد: ${data.error}</p>`;
+                }
+            } catch (err) {
+                answerDiv.innerHTML = '<p>نت وصل نیست یا سرور قاط زده!</p>';
+            }
+        });
+    </script>
+</body>
+</html>
